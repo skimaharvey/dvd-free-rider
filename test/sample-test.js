@@ -116,8 +116,7 @@ describe('[Challenge] Free Rider', function () {
             );
         const ethAttack = this.weth.connect(attacker)
 
-        // await ethAttack.deposit({value: ethers.utils.parseEther("0.35")})
-        //await ethAttack.transfer(uniswapPairAttack.address, await ethAttack.balanceOf(attacker.address))
+
         await ethAttack.approve(attackContract.address, ethers.utils.parseEther("21"))
 
         const amount0Out = ethers.utils.parseEther("15")
